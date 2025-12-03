@@ -1,12 +1,14 @@
+// src/ClientPortal.jsx
 import React, { useState, useEffect } from "react";
 import {
-  fetchOrders,
-  fetchAddresses,
-  fetchTickets,
+  fetchOrders as apiFetchOrders,
+  fetchAddresses as apiFetchAddresses,
+  fetchTickets as apiFetchTickets,
   fetchProfile,
   updateProfile,
   createTicket,
 } from "./clientPortalApi";
+import CardarisHeader from "./components/CardarisHeader";
 
 const TABS = {
   DASHBOARD: "dashboard",
@@ -15,6 +17,44 @@ const TABS = {
   SUPPORT: "support",
   ACCOUNT: "account",
 };
+
+// URL de la boutique Shopify (pour logout, etc.)
+const SHOP_URL =
+  import.meta.env.VITE_SHOP_URL || "https://cardaris.myshopify.com";
+
+/* ================== WRAPPERS (API) ================== */
+
+async function fetchOrders() {
+  // Commandes réelles depuis l’API
+  return apiFetchOrders();
+}
+
+async function fetchAddresses() {
+  const data = await apiFetchAddresses();
+  if (!Array.isArray(data)) return [];
+
+  // Mapping Shopify -> format attendu par AddressBlock
+  return data.map((addr) => ({
+    id: addr.id,
+    label:
+      addr.name ||
+      (addr.default ? "Adresse principale" : "Adresse de livraison"),
+    name: [addr.first_name, addr.last_name].filter(Boolean).join(" "),
+    line1: addr.address1 || "",
+    line2: addr.address2 || "",
+    zip: addr.zip || "",
+    city: addr.city || "",
+    country: addr.country || addr.country_name || "",
+    phone: addr.phone || "",
+    isDefault: !!addr.default,
+  }));
+}
+
+async function fetchTickets() {
+  // API maquette : pour l’instant ça renvoie []
+  const data = await apiFetchTickets();
+  return Array.isArray(data) ? data : [];
+}
 
 /* ================== CSS global Dashboard Cardaris (injection) ================== */
 
@@ -124,11 +164,10 @@ const CP_STYLES = `
     font-size: 15px;
   }
 
-  /* BOUTON SE DÉCONNECTER (desktop) -> collé sous "Mon compte" */
+  /* BOUTON SE DÉCONNECTER (desktop) */
   .cp-logout-button {
     margin-top: 8px;
     align-self: stretch;
-
     border-radius: 999px;
     border: 1px solid rgba(248, 113, 113, 0.55);
     background: rgba(127, 29, 29, 0.45);
@@ -742,7 +781,6 @@ const CP_STYLES = `
       padding: 16px 12px 70px;
     }
 
-    /* Sur mobile : on cache complètement la sidebar */
     .cp-sidebar {
       display: none;
     }
@@ -786,6 +824,8 @@ const CP_STYLES = `
   }
 `;
 
+/* ================== Composant principal ================== */
+
 export default function ClientPortal() {
   const [activeTab, setActiveTab] = useState(TABS.DASHBOARD);
   const [isMobile, setIsMobile] = useState(false);
@@ -828,109 +868,115 @@ export default function ClientPortal() {
   };
 
   return (
-    <div className="cp-root">
-      <div className="cp-layout">
-        <aside className="cp-sidebar">
-          <div className="cp-sidebar-header">
-            <div className="cp-sidebar-title">Espace client Cardaris</div>
-          </div>
+    <>
+      <CardarisHeader />
 
-          <nav className="cp-sidebar-nav">
-            <SidebarButton
-              label="Tableau de bord"
-              active={activeTab === TABS.DASHBOARD}
-              onClick={() => setActiveTab(TABS.DASHBOARD)}
-              icon="🏠"
-            />
-            <SidebarButton
-              label="Mes commandes"
-              active={activeTab === TABS.ORDERS}
-              onClick={() => setActiveTab(TABS.ORDERS)}
-              icon="📦"
-            />
-            <SidebarButton
-              label="Mes adresses"
-              active={activeTab === TABS.ADDRESSES}
-              onClick={() => setActiveTab(TABS.ADDRESSES)}
-              icon="📍"
-            />
-            <SidebarButton
-              label="Tickets / Support"
-              active={activeTab === TABS.SUPPORT}
-              onClick={() => setActiveTab(TABS.SUPPORT)}
-              icon="🎫"
-            />
-            <SidebarButton
-              label="Mon compte"
-              active={activeTab === TABS.ACCOUNT}
-              onClick={() => setActiveTab(TABS.ACCOUNT)}
-              icon="👤"
-            />
-          </nav>
+      <div className="cp-root">
+        <div className="cp-layout">
+          <aside className="cp-sidebar">
+            <div className="cp-sidebar-header">
+              <div className="cp-sidebar-title">Espace client Cardaris</div>
+            </div>
 
-          <button
-            className="cp-logout-button"
-            type="button"
-            onClick={() => {
-              // À remplacer par la vraie logique de logout plus tard
-              alert("Déconnexion (démo) – ici on appellera le logout réel.");
-            }}
-          >
-            Se déconnecter
-          </button>
-        </aside>
+            <nav className="cp-sidebar-nav">
+              {/* Plus d'Accueil boutique ici */}
+              <SidebarButton
+                label="Tableau de bord"
+                active={activeTab === TABS.DASHBOARD}
+                onClick={() => setActiveTab(TABS.DASHBOARD)}
+                icon="📊"
+              />
+              <SidebarButton
+                label="Mes commandes"
+                active={activeTab === TABS.ORDERS}
+                onClick={() => setActiveTab(TABS.ORDERS)}
+                icon="📦"
+              />
+              <SidebarButton
+                label="Mes adresses"
+                active={activeTab === TABS.ADDRESSES}
+                onClick={() => setActiveTab(TABS.ADDRESSES)}
+                icon="📍"
+              />
+              <SidebarButton
+                label="Tickets / Support"
+                active={activeTab === TABS.SUPPORT}
+                onClick={() => setActiveTab(TABS.SUPPORT)}
+                icon="🎫"
+              />
+              <SidebarButton
+                label="Mon compte"
+                active={activeTab === TABS.ACCOUNT}
+                onClick={() => setActiveTab(TABS.ACCOUNT)}
+                icon="👤"
+              />
+            </nav>
 
-        <main className="cp-main">{renderContent()}</main>
+            {/* Logout Shopify desktop */}
+            <button
+              className="cp-logout-button"
+              type="button"
+              onClick={() => {
+                window.location.href = `${SHOP_URL}/account/logout`;
+              }}
+            >
+              Se déconnecter
+            </button>
+          </aside>
+
+          <main className="cp-main">{renderContent()}</main>
+        </div>
+
+        {isMobile && (
+          <>
+            <div className="cp-bottom-nav">
+              {/* Mobile : Tableau de bord au lieu d'Accueil boutique */}
+              <BottomNavItem
+                label="Tableau de bord"
+                icon="📊"
+                active={activeTab === TABS.DASHBOARD}
+                onClick={() => setActiveTab(TABS.DASHBOARD)}
+              />
+              <BottomNavItem
+                label="Commandes"
+                icon="📦"
+                active={activeTab === TABS.ORDERS}
+                onClick={() => setActiveTab(TABS.ORDERS)}
+              />
+              <BottomNavItem
+                label="Adresses"
+                icon="📍"
+                active={activeTab === TABS.ADDRESSES}
+                onClick={() => setActiveTab(TABS.ADDRESSES)}
+              />
+              <BottomNavItem
+                label="Tickets"
+                icon="🎫"
+                active={activeTab === TABS.SUPPORT}
+                onClick={() => setActiveTab(TABS.SUPPORT)}
+              />
+              <BottomNavItem
+                label="Compte"
+                icon="👤"
+                active={activeTab === TABS.ACCOUNT}
+                onClick={() => setActiveTab(TABS.ACCOUNT)}
+              />
+            </div>
+
+            {/* Logout Shopify mobile */}
+            <button
+              type="button"
+              className="cp-logout-button cp-logout-floating"
+              onClick={() => {
+                window.location.href = `${SHOP_URL}/account/logout`;
+              }}
+            >
+              Se déconnecter
+            </button>
+          </>
+        )}
       </div>
-
-      {isMobile && (
-        <>
-          <div className="cp-bottom-nav">
-            <BottomNavItem
-              label="Accueil"
-              icon="🏠"
-              active={activeTab === TABS.DASHBOARD}
-              onClick={() => setActiveTab(TABS.DASHBOARD)}
-            />
-            <BottomNavItem
-              label="Commandes"
-              icon="📦"
-              active={activeTab === TABS.ORDERS}
-              onClick={() => setActiveTab(TABS.ORDERS)}
-            />
-            <BottomNavItem
-              label="Adresses"
-              icon="📍"
-              active={activeTab === TABS.ADDRESSES}
-              onClick={() => setActiveTab(TABS.ADDRESSES)}
-            />
-            <BottomNavItem
-              label="Tickets"
-              icon="🎫"
-              active={activeTab === TABS.SUPPORT}
-              onClick={() => setActiveTab(TABS.SUPPORT)}
-            />
-            <BottomNavItem
-              label="Compte"
-              icon="👤"
-              active={activeTab === TABS.ACCOUNT}
-              onClick={() => setActiveTab(TABS.ACCOUNT)}
-            />
-          </div>
-
-          {/* Bouton déconnexion mobile flottant */}
-          <button
-            type="button"
-            className="cp-logout-button cp-logout-floating"
-            onClick={() => {
-              alert("Déconnexion (démo) – ici on appellera le logout réel.");
-            }}
-          >
-            Se déconnecter
-          </button>
-        </>
-      )}
-    </div>
+    </>
   );
 }
 
@@ -1163,7 +1209,7 @@ function AddressesView() {
         )}
       </div>
 
-      {/* Formulaire -> toujours en mode démo tant qu’on n’a pas de POST réel */}
+      {/* Formulaire -> toujours maquette pour l’instant */}
       <div className="cp-card cp-card--form">
         <h2 className="cp-card-title">Ajouter une adresse</h2>
         <p className="cp-card-subtitle">
@@ -1176,7 +1222,7 @@ function AddressesView() {
           onSubmit={(e) => {
             e.preventDefault();
             alert(
-              "Démo : l’ajout d’adresse sera connecté à votre compte Cardaris."
+              "L’ajout d’adresse sera bientôt connecté à votre compte Cardaris."
             );
           }}
         >
@@ -1240,7 +1286,7 @@ function AddressesView() {
 
           <div className="cp-form-actions">
             <button type="submit" className="cp-btn cp-btn--primary">
-              (Démo) Enregistrer l’adresse
+              Enregistrer l’adresse
             </button>
           </div>
         </form>
@@ -1267,14 +1313,16 @@ function AddressBlock({
           {label} {isDefault && <span className="cp-pill">Par défaut</span>}
         </div>
         <div className="cp-address-lines">
-          <div>{name}</div>
-          <div>{line1}</div>
+          {name && <div>{name}</div>}
+          {line1 && <div>{line1}</div>}
           {line2 && <div>{line2}</div>}
-          <div>
-            {zip} {city}
-          </div>
-          <div>{country}</div>
-          <div className="cp-address-phone">Tél. {phone}</div>
+          {(zip || city) && (
+            <div>
+              {zip} {city}
+            </div>
+          )}
+          {country && <div>{country}</div>}
+          {phone && <div className="cp-address-phone">Tél. {phone}</div>}
         </div>
       </div>
       <div className="cp-address-actions">
@@ -1421,10 +1469,10 @@ function NewTicketForm() {
           setSending(false);
           if (!res.ok) {
             alert(
-              "Démo / erreur API : la création de ticket réel sera branchée sur ton backend."
+              "Erreur API : la création de ticket sera reliée à votre compte Cardaris."
             );
           } else {
-            alert("Ticket envoyé (ou simulé en mode démo).");
+            alert("Ticket envoyé.");
             setSubject("");
             setMessage("");
           }
@@ -1567,18 +1615,30 @@ function AccountView() {
               disabled={saving}
               onClick={async () => {
                 setSaving(true);
-                const res = await updateProfile(profile);
-                setSaving(false);
-                if (!res.ok) {
-                  alert(
-                    "Démo / erreur API : la mise à jour réelle sera branchée sur ton backend."
+                setError("");
+                try {
+                  const payload = {
+                    fullName: profile.fullName,
+                    email: profile.email,
+                    nickname: profile.nickname,
+                    notifications: profile.notifications,
+                  };
+                  const res = await updateProfile(payload);
+                  if (res && res.profile) {
+                    setProfile(res.profile);
+                  }
+                  alert("Profil mis à jour.");
+                } catch (err) {
+                  console.error(err);
+                  setError(
+                    "Impossible de mettre à jour votre profil pour le moment."
                   );
-                } else {
-                  alert("Profil mis à jour (ou simulé en mode démo).");
+                } finally {
+                  setSaving(false);
                 }
               }}
             >
-              {saving ? "Enregistrement..." : "(Démo) Mettre à jour le profil"}
+              {saving ? "Enregistrement..." : "Mettre à jour le profil"}
             </button>
           </div>
         </div>
@@ -1643,7 +1703,7 @@ function AccountView() {
                 className="cp-btn cp-btn--ghost cp-btn--danger"
                 type="button"
               >
-                Demander la suppression du compte (démo)
+                Demander la suppression du compte
               </button>
             </div>
           </div>

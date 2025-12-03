@@ -826,8 +826,6 @@ a {
   color: #ffffff;
 }
 
-/* Vide pour liste de commandes filtrée */
-
 .orders-empty {
   margin-top: 4px;
   font-size: 12px;
@@ -837,623 +835,6 @@ a {
   background: rgba(255, 255, 255, 0.03);
 }
 
-/* ========= Layout & filtres Support ========= */
-
-.support-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.support-summary {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.7);
-  flex-wrap: wrap;
-}
-
-.support-summary__count strong {
-  font-weight: 600;
-  color: #ffffff;
-}
-
-.support-summary__bullet {
-  opacity: 0.5;
-}
-
-.support-summary__open {
-  color: #fbbf24;
-}
-
-.support-summary__progress {
-  color: #38bdf8;
-}
-
-.support-summary__resolved {
-  color: #4ade80;
-}
-
-.support-filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.support-chip {
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  background: transparent;
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 12px;
-  padding: 4px 10px;
-  cursor: pointer;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
-}
-
-.support-chip--active {
-  background: rgba(60, 117, 139, 0.25);
-  border-color: #3c758b;
-  color: #ffffff;
-}
-
-/* Layout 2 colonnes */
-
-.support-layout {
-  margin-top: 10px;
-  display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(260px, 0.9fr);
-  gap: 14px;
-}
-
-.support-left,
-.support-right {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-@media (max-width: 900px) {
-  .support-layout {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* ========= Page "Mes adresses" ========= */
-
-.addresses-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-bottom: 10px;
-}
-
-.addresses-header__info {
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.65);
-}
-
-.addresses-header__button {
-  white-space: nowrap;
-}
-
-.addresses-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-}
-
-@media (max-width: 900px) {
-  .addresses-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.address-card {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.address-card__top {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.address-card__label-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.address-card__label {
-  font-size: 13px;
-  font-weight: 500;
-}
-
-.address-card__badge {
-  font-size: 10px;
-  border-radius: 999px;
-  padding: 2px 7px;
-  background: rgba(34, 197, 94, 0.16);
-  color: #bbf7d0;
-}
-
-.address-card__name {
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.address-card__lines {
-  margin-top: 4px;
-  font-size: 13px;
-  color: #ffffff;
-}
-
-.address-card__lines div {
-  line-height: 1.25;
-}
-
-.address-card__phone {
-  margin-top: 4px;
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.address-card__phone span {
-  color: #ffffff;
-}
-
-.address-card__actions {
-  margin-top: 8px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.address-card__action {
-  font-size: 12px;
-  padding-inline: 10px;
-}
-
-.address-card__action--danger {
-  border-color: rgba(248, 113, 113, 0.7);
-  color: #fecaca;
-}
-.address-card__action--danger:hover {
-  background: rgba(248, 113, 113, 0.15);
-}
-
-/* ========= Page "Mon compte" ========= */
-
-.account-header {
-  margin-top: 4px;
-  margin-bottom: 12px;
-  padding: 12px 14px;
-  border-radius: 14px;
-  background: radial-gradient(circle at top left, #3c758b33, transparent 55%),
-    rgba(5, 6, 8, 0.95);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.account-header__left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.account-header__avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 999px;
-  background: linear-gradient(135deg, #3c758b, #0ea5e9);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 16px;
-  color: #f9fafb;
-}
-
-.account-header__name {
-  font-size: 15px;
-  font-weight: 600;
-}
-
-.account-header__email {
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.75);
-}
-
-.account-header__meta {
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.6);
-}
-
-.account-header__right {
-  display: flex;
-  align-items: center;
-}
-
-.account-header__badge {
-  font-size: 11px;
-  border-radius: 999px;
-  padding: 4px 10px;
-  border: 1px solid rgba(34, 197, 94, 0.7);
-  color: #bbf7d0;
-  background: rgba(34, 197, 94, 0.12);
-}
-
-/* Grille principale */
-
-.account-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(260px, 1fr);
-  gap: 16px;
-  margin-top: 6px;
-}
-
-.account-card {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.account-card__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 10px;
-}
-
-.account-card__title {
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.account-card__subtitle {
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.65);
-}
-
-/* Champs */
-
-.account-fields {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-}
-
-.account-field {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.account-field--full {
-  grid-column: 1 / -1;
-}
-
-.account-field label {
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.75);
-}
-
-.account-field input {
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  background: #050608;
-  color: #ffffff;
-  padding: 7px 9px;
-  font-size: 13px;
-}
-
-.account-field input:focus {
-  outline: none;
-  border-color: rgba(56, 189, 248, 0.9);
-  box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.4);
-}
-
-/* Colonne droite */
-
-.account-right-col {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-/* Sécurité */
-
-.account-security {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: 4px;
-}
-
-.account-security__row {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  align-items: flex-start;
-}
-
-.account-security__label {
-  font-size: 13px;
-  font-weight: 500;
-}
-
-.account-security__hint {
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.65);
-  margin-top: 2px;
-}
-
-.account-security__button {
-  white-space: nowrap;
-}
-
-/* Tag statut sécurité */
-
-.account-tag {
-  font-size: 11px;
-  border-radius: 999px;
-  padding: 3px 8px;
-  border: 1px solid rgba(56, 189, 248, 0.7);
-  color: #7dd3fc;
-  background: rgba(56, 189, 248, 0.12);
-}
-
-/* Préférences */
-
-.account-preferences {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: 4px;
-}
-
-.account-toggle {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  font-size: 13px;
-  color: #e5e7eb;
-}
-
-.account-toggle input {
-  margin-top: 2px;
-  accent-color: #3c758b;
-}
-
-.account-toggle small {
-  display: block;
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.65);
-}
-
-/* Bouton enregistrer */
-
-.account-actions {
-  margin-top: 4px;
-  display: flex;
-  justify-content: flex-end;
-}
-
-/* Responsive */
-
-@media (max-width: 900px) {
-  .account-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .account-fields {
-    grid-template-columns: 1fr;
-  }
-
-  .account-header {
-    align-items: flex-start;
-  }
-
-  .account-actions {
-    justify-content: flex-start;
-  }
-}
-
-/* ========= Page de login Cardaris ========= */
-
-.login-page {
-  min-height: 100vh;
-  background: #050608;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-}
-
-.login-card {
-  width: 100%;
-  max-width: 420px;
-  border-radius: 18px;
-  background: radial-gradient(circle at top left, #3c758b33, transparent 55%),
-    rgba(5, 6, 8, 0.96);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  padding: 20px 18px 18px;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7);
-}
-
-.login-card__logo {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 10px;
-}
-
-.login-card__logo-mark {
-  width: 32px;
-  height: 32px;
-  border-radius: 999px;
-  background: linear-gradient(135deg, #3c758b, #fbbf24);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  color: #050608;
-}
-
-.login-card__logo-text {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.login-card__logo-title {
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.login-card__logo-sub {
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.65);
-}
-
-.login-card__title {
-  font-size: 18px;
-  font-weight: 600;
-  margin-top: 6px;
-}
-
-.login-card__subtitle {
-  margin-top: 4px;
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.login-card__form {
-  margin-top: 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.login-field {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.login-field label {
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.75);
-}
-
-.login-field input {
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  background: #050608;
-  color: #ffffff;
-  padding: 7px 9px;
-  font-size: 13px;
-}
-
-.login-card__button {
-  width: 100%;
-  margin-top: 4px;
-}
-
-.login-card__button-secondary {
-  width: 100%;
-}
-
-.login-card__hint {
-  margin-top: 4px;
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.6);
-  text-align: center;
-}
-
-/* ========== Header & filtres - MES COMMANDES ========== */
-
-.orders-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  margin-top: 12px;
-  margin-bottom: 14px;
-  flex-wrap: wrap;
-}
-
-.orders-summary {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.orders-summary__count strong {
-  font-weight: 600;
-  color: #ffffff;
-}
-
-.orders-summary__bullet {
-  opacity: 0.6;
-}
-
-.orders-summary__active {
-  color: #bfdbfe; /* bleu clair */
-}
-
-.orders-summary__delivered {
-  color: #bbf7d0; /* vert clair */
-}
-
-.orders-filters {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-.orders-chip {
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  background: rgba(5, 6, 8, 0.85);
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 12px;
-  padding: 5px 10px;
-  cursor: pointer;
-  transition: background 0.15s, border-color 0.15s, transform 0.08s;
-}
-
-.orders-chip:hover {
-  background: rgba(255, 255, 255, 0.06);
-}
-
-.orders-chip--active {
-  border-color: #3c758b;
-  background: rgba(60, 117, 139, 0.2);
-  color: #ffffff;
-  transform: translateY(-1px);
-}
-
-.orders-empty {
-  margin-top: 8px;
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.6);
-}
-
 /* petit ajustement sur mobile */
 @media (max-width: 900px) {
   .orders-header {
@@ -1461,16 +842,16 @@ a {
   }
 }
 
-/* ========== Header & layout - SUPPORT / TICKETS ========== */
+/* ========= Header & layout - SUPPORT / TICKETS ========== */
 
 .support-top {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 12px;
+  flex-wrap: wrap;
   margin-top: 12px;
   margin-bottom: 14px;
-  flex-wrap: wrap;
 }
 
 .support-summary {
@@ -1479,6 +860,7 @@ a {
   gap: 6px;
   font-size: 13px;
   color: rgba(255, 255, 255, 0.7);
+  flex-wrap: wrap;
 }
 
 .support-summary__count strong {
@@ -1491,21 +873,21 @@ a {
 }
 
 .support-summary__open {
-  color: #bfdbfe; /* bleu clair */
+  color: #bfdbfe;
 }
 
 .support-summary__progress {
-  color: #fde68a; /* jaune */
+  color: #fde68a;
 }
 
 .support-summary__resolved {
-  color: #bbf7d0; /* vert clair */
+  color: #bbf7d0;
 }
 
 .support-filters {
   display: flex;
-  gap: 6px;
   flex-wrap: wrap;
+  gap: 6px;
 }
 
 .support-chip {
@@ -1553,7 +935,7 @@ a {
   }
 }
 
-/* ========== Mes adresses ========== */
+/* ========= Mes adresses ========== */
 
 .addresses-header {
   margin-top: 14px;
@@ -1628,7 +1010,7 @@ a {
 .address-card__lines {
   margin-top: 4px;
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.9);
+  color: #ffffff;
 }
 
 .address-card__lines div {
@@ -1978,5 +1360,190 @@ a {
   .client-portal__main {
     padding: 16px 16px 80px; /* espace pour ne pas que la barre recouvre le contenu */
     min-height: calc(100vh - 80px);
+  }
+}
+
+/* ========= HEADER DASHBOARD CARDARIS ========= */
+
+.cd-header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: rgba(5, 6, 8, 0.97);
+  backdrop-filter: blur(18px);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.28);
+}
+
+.cd-header-inner {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 16px 24px; /* hauteur générale du header (desktop + mobile) */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* Zones de base */
+
+.cd-left,
+.cd-center,
+.cd-right {
+  display: flex;
+  align-items: center;
+}
+
+/* logo */
+
+.cd-logo-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cd-logo {
+  height: 32px; /* taille du logo */
+  width: auto;
+}
+
+/* flèche retour (premium) */
+
+.cd-back-btn {
+  display: none; /* visible uniquement sur mobile */
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 1px solid rgba(56, 189, 248, 0.7);
+  background: radial-gradient(circle at top left, #3c758b55, #020617 60%);
+  color: #e5f2ff;
+  font-size: 18px;
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.9);
+  transition: background 0.15s, transform 0.08s, box-shadow 0.15s, border-color 0.15s;
+}
+
+.cd-back-btn:hover {
+  background: radial-gradient(circle at top left, #0ea5e9aa, #020617 60%);
+  border-color: rgba(56, 189, 248, 1);
+  transform: translateY(-1px);
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 1);
+}
+
+/* Nav desktop */
+
+.cd-nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cd-nav-link {
+  border-radius: 999px;
+  padding: 7px 16px;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #e5e7eb;
+  cursor: pointer;
+  transition: background 0.16s, border-color 0.16s, color 0.16s;
+}
+
+.cd-nav-link:hover {
+  background: rgba(15, 23, 42, 0.95);
+  border-color: rgba(148, 163, 184, 0.75);
+}
+
+/* ======= Responsive header ======= */
+
+@media (max-width: 900px) {
+  /* flèche + logo alignés parfaitement */
+
+  .cd-back-btn {
+    display: inline-flex;
+  }
+
+  .cd-header-inner {
+    padding: 16px 14px;
+  }
+
+  .cd-left,
+  .cd-right {
+    flex: 0 0 44px; /* même largeur de "colonne" gauche/droite pour centrer le logo */
+    justify-content: center;
+  }
+
+  .cd-center {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .cd-logo-link {
+    margin: 0 auto;
+  }
+
+  /* nav supprimée en haut sur mobile */
+  .cd-nav {
+    display: none;
+  }
+}
+
+@media (min-width: 901px) {
+  /* On cache la flèche en desktop */
+  .cd-back-btn,
+  .cd-left {
+    display: none;
+  }
+
+  /* Header en ligne : logo à gauche, nav centrée */
+  .cd-header-inner {
+    max-width: 1320px;
+    margin: 0 auto;
+    height: 78px;              /* header un peu plus haut */
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    position: relative;        /* pour centrer ACCUEIL en absolu */
+  }
+
+  /* Logo côté gauche */
+  .cd-center {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex: 0 0 auto;
+  }
+
+  .cd-logo {
+    height: 32px;
+    display: block;
+  }
+
+  /* ACCUEIL parfaitement centré dans la page */
+  .cd-nav {
+    display: block;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .cd-nav-list {
+    list-style: none;
+    display: flex;
+    gap: 16px;
+  }
+
+  .cd-nav-link {
+    font-size: 13px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #f5f5f5;
+    background: transparent;
+    border: none;
+    cursor: pointer;
   }
 }
