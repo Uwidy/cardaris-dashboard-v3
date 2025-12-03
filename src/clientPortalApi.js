@@ -1,71 +1,97 @@
 // src/clientPortalApi.js
 
-const API_BASE_URL =
-  import.meta.env.VITE_PORTAL_API_BASE_URL || "http://localhost:4000";
+// On enlève le / final si jamais il y en a un
+const API_BASE =
+  (import.meta.env.VITE_PORTAL_API_URL || "http://localhost:4000").replace(/\/$/, "");
 
-async function apiGet(path) {
-  const res = await fetch(`${API_BASE_URL}${path}`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
+console.log("[Cardaris Portal] API_BASE utilisé côté front =", API_BASE);
 
-  if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(
-      `GET ${path} - ${res.status} ${res.statusText} — ${text || "Erreur API"}`
-    );
+/**
+ * Petit helper générique pour appeler l'API Cardaris Portal
+ * -> ajoute automatiquement le ?customerId=... présent dans l'URL
+ */
+async function api(path, options = {}) {
+  // On récupère la query de la page (ex: ?customerId=12345)
+  const query =
+    typeof window !== "undefined" ? window.location.search || "" : "";
+
+  // Exemple final : https://api-render.com/orders?customerId=12345
+  const url = `${API_BASE}${path}${query}`;
+
+  try {
+    const res = await fetch(url, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "omit",
+      ...options,
+    });
+
+    if (!res.ok) {
+      let details = "";
+      try {
+        const data = await res.json();
+        details = data.error || data.details || "";
+      } catch (e) {
+        // ignore
+      }
+      const baseMsg = `Erreur API (${res.status})`;
+      throw new Error(details ? `${baseMsg} : ${details}` : baseMsg);
+    }
+
+    return res.json();
+  } catch (err) {
+    if (err.message === "Failed to fetch") {
+      throw new Error(
+        "Impossible de contacter le serveur du portail Cardaris. " +
+          "Vérifiez qu'il est bien démarré et que l'URL VITE_PORTAL_API_URL est correcte."
+      );
+    }
+    throw err;
   }
-
-  return res.json();
 }
 
-async function apiPost(path, body) {
-  const res = await fetch(`${API_BASE_URL}${path}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(body),
-  });
-
-  if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(
-      `POST ${path} - ${res.status} ${res.statusText} — ${text || "Erreur API"}`
-    );
-  }
-
-  return res.json();
-}
-
-/* ========== PROFIL (LOCAL) ========== */
-
-export async function fetchProfile() {
-  return apiGet("/profile");
-}
-
-export async function updateProfile(profileData) {
-  return apiPost("/profile/update", profileData);
-}
-
-/* ========== COMMANDES / ADRESSES (SHOPIFY) ========== */
+/* ========== Commandes ========== */
 
 export async function fetchOrders() {
-  return apiGet("/orders");
+  return api("/orders");
 }
+
+export async function fetchOrderDetails(orderId) {
+  if (!orderId) {
+    throw new Error("ID de commande manquant.");
+  }
+  return api(`/orders/${orderId}`);
+}
+
+/* ========== Adresses ========== */
 
 export async function fetchAddresses() {
-  return apiGet("/addresses");
+  return api("/addresses");
 }
 
-/* ========== TICKETS (MAQUETTE) ========== */
+/* ========== Tickets ========== */
 
 export async function fetchTickets() {
-  return apiGet("/tickets");
+  return api("/tickets");
 }
 
-export async function createTicket(ticketPayload) {
-  return apiPost("/tickets/new", ticketPayload);
+export async function createTicket(payload) {
+  return api("/tickets/new", {
+    method: "POST",
+    body: JSON.stringify(payload || {}),
+  });
+}
+
+/* ========== Profil ========== */
+
+export async function fetchProfile() {
+  return api("/profile");
+}
+
+export async function updateProfile(payload) {
+  return api("/profile/update", {
+    method: "POST",
+    body: JSON.stringify(payload || {}),
+  });
 }

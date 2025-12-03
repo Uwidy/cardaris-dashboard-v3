@@ -7,6 +7,7 @@ import {
   fetchProfile,
   updateProfile,
   createTicket,
+  fetchOrderDetails as apiFetchOrderDetails,
 } from "./clientPortalApi";
 import CardarisHeader from "./components/CardarisHeader";
 
@@ -18,14 +19,16 @@ const TABS = {
   ACCOUNT: "account",
 };
 
-// URL de la boutique Shopify (pour logout, etc.)
+// URL de la boutique Shopify (logout)
 const SHOP_URL =
   import.meta.env.VITE_SHOP_URL || "https://cardaris.myshopify.com";
+
+// URL page de tracking ParcelPanel
+const PARCELPANEL_TRACK_URL = "https://www.cardaris.fr/a/tracking";
 
 /* ================== WRAPPERS (API) ================== */
 
 async function fetchOrders() {
-  // Commandes réelles depuis l’API
   return apiFetchOrders();
 }
 
@@ -33,7 +36,6 @@ async function fetchAddresses() {
   const data = await apiFetchAddresses();
   if (!Array.isArray(data)) return [];
 
-  // Mapping Shopify -> format attendu par AddressBlock
   return data.map((addr) => ({
     id: addr.id,
     label:
@@ -51,9 +53,48 @@ async function fetchAddresses() {
 }
 
 async function fetchTickets() {
-  // API maquette : pour l’instant ça renvoie []
   const data = await apiFetchTickets();
   return Array.isArray(data) ? data : [];
+}
+
+async function fetchOrderDetails(orderId) {
+  if (!orderId) return null;
+  return apiFetchOrderDetails(orderId);
+}
+
+/* ================== Helpers statut & format ================== */
+
+function mapStatus(status) {
+  const normalized = (status || "").toLowerCase();
+
+  if (!normalized || normalized === "pending" || normalized === "unfulfilled") {
+    return { text: "En cours de préparation", variant: "info" };
+  }
+
+  if (normalized === "fulfilled" || normalized === "success") {
+    return { text: "Expédiée", variant: "success" };
+  }
+
+  if (normalized === "cancelled" || normalized === "canceled") {
+    return { text: "Annulée", variant: "warning" };
+  }
+
+  return { text: status || "Statut inconnu", variant: "default" };
+}
+
+function formatMoney(amount, currency) {
+  if (amount == null) return `0.00 ${currency || "EUR"}`;
+  const num = Number(amount);
+  if (Number.isNaN(num)) return `${amount} ${currency || "EUR"}`;
+  return `${num.toFixed(2)} ${currency || "EUR"}`;
+}
+
+// extrait 1001 depuis "#CMD-1001" par ex.
+function extractOrderNumber(orderIdDisplay) {
+  if (!orderIdDisplay) return "";
+  const onlyDigits = String(orderIdDisplay).match(/\d+/g);
+  if (!onlyDigits) return String(orderIdDisplay).replace("#", "");
+  return onlyDigits.join("");
 }
 
 /* ================== CSS global Dashboard Cardaris (injection) ================== */
@@ -401,6 +442,69 @@ const CP_STYLES = `
     border: 1px solid rgba(148, 163, 184, 0.6);
   }
 
+  /* Détail commande */
+  .cp-order-details-meta {
+    font-size: 13px;
+    color: var(--cp-text-muted);
+    margin-bottom: 6px;
+  }
+
+  .cp-order-details-line {
+    font-size: 13px;
+    color: var(--cp-text-muted);
+    margin-bottom: 4px;
+  }
+
+  .cp-order-details-header-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+    font-size: 13px;
+  }
+
+  .cp-order-details-items {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 6px;
+  }
+
+  .cp-order-details-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding-top: 6px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    font-size: 13px;
+  }
+
+  .cp-order-details-item-left {
+    flex: 1;
+  }
+
+  .cp-order-details-item-title {
+    font-weight: 500;
+  }
+
+  .cp-order-details-item-meta {
+    font-size: 12px;
+    color: var(--cp-text-muted);
+  }
+
+  .cp-order-details-item-right {
+    text-align: right;
+    font-size: 13px;
+  }
+
+  .cp-order-details-section-title {
+    margin-top: 10px;
+    margin-bottom: 4px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
   /* Adresses */
   .cp-address-block {
     display: flex;
@@ -679,7 +783,6 @@ const CP_STYLES = `
   }
 
   /* Bottom nav mobile */
-
   .cp-bottom-nav {
     position: fixed;
     left: 0;
@@ -829,6 +932,7 @@ const CP_STYLES = `
 export default function ClientPortal() {
   const [activeTab, setActiveTab] = useState(TABS.DASHBOARD);
   const [isMobile, setIsMobile] = useState(false);
+  const [apiReachable, setApiReachable] = useState(true);
 
   // Injection CSS
   useEffect(() => {
@@ -841,6 +945,7 @@ export default function ClientPortal() {
     }
   }, []);
 
+  // Détection mobile
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 900);
@@ -850,12 +955,32 @@ export default function ClientPortal() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // Health check API portail (facultatif, juste pour le message rouge)
+  useEffect(() => {
+    const base = import.meta.env.VITE_PORTAL_API_URL;
+    if (!base) {
+      setApiReachable(false);
+      return;
+    }
+    const url = base.replace(/\/$/, "") + "/health";
+
+    (async () => {
+      try {
+        const res = await fetch(url, { method: "GET" });
+        setApiReachable(res.ok);
+      } catch (err) {
+        console.error("[health] error", err);
+        setApiReachable(false);
+      }
+    })();
+  }, []);
+
   const renderContent = () => {
     switch (activeTab) {
       case TABS.DASHBOARD:
         return <DashboardView />;
       case TABS.ORDERS:
-        return <OrdersView />;
+        return <OrdersView apiReachable={apiReachable} />;
       case TABS.ADDRESSES:
         return <AddressesView />;
       case TABS.SUPPORT:
@@ -879,7 +1004,6 @@ export default function ClientPortal() {
             </div>
 
             <nav className="cp-sidebar-nav">
-              {/* Plus d'Accueil boutique ici */}
               <SidebarButton
                 label="Tableau de bord"
                 active={activeTab === TABS.DASHBOARD}
@@ -930,7 +1054,6 @@ export default function ClientPortal() {
         {isMobile && (
           <>
             <div className="cp-bottom-nav">
-              {/* Mobile : Tableau de bord au lieu d'Accueil boutique */}
               <BottomNavItem
                 label="Tableau de bord"
                 icon="📊"
@@ -1068,29 +1191,85 @@ function DashboardView() {
   );
 }
 
-function OrdersView() {
+/* ========== Mes commandes ========== */
+
+function OrdersView({ apiReachable }) {
   const [orders, setOrders] = useState([]);
+  const [customerEmail, setCustomerEmail] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [orderDetails, setOrderDetails] = useState(null);
+  const [detailsLoading, setDetailsLoading] = useState(false);
+  const [detailsError, setDetailsError] = useState("");
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const data = await fetchOrders();
-        if (!cancelled) {
-          setOrders(data);
+        setLoading(true);
+        setError("");
+
+        const [ordersData, profileData] = await Promise.all([
+          fetchOrders(),
+          fetchProfile().catch(() => null),
+        ]);
+
+        if (cancelled) return;
+
+        setOrders(ordersData || []);
+        if (profileData && profileData.email) {
+          setCustomerEmail(profileData.email);
         }
       } catch (err) {
-        if (!cancelled) setError("Impossible de charger vos commandes.");
+        if (!cancelled) {
+          setError("Impossible de charger vos commandes.");
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
     })();
+
     return () => {
       cancelled = true;
     };
   }, []);
+
+  const handleViewDetails = async (order) => {
+    if (!order || !order.orderId) return;
+
+    setSelectedOrder(order);
+    setOrderDetails(null);
+    setDetailsError("");
+    setDetailsLoading(true);
+
+    try {
+      const details = await fetchOrderDetails(order.orderId);
+      setOrderDetails(details);
+    } catch (err) {
+      setDetailsError(
+        "Impossible de charger le détail de cette commande pour le moment."
+      );
+    } finally {
+      setDetailsLoading(false);
+    }
+  };
+
+  const handleTrackOrder = (order) => {
+    if (!order) return;
+    const orderNumber = extractOrderNumber(order.id);
+
+    let url = `${PARCELPANEL_TRACK_URL}?order=${encodeURIComponent(
+      orderNumber
+    )}`;
+
+    if (customerEmail) {
+      url += `&email=${encodeURIComponent(customerEmail)}`;
+    }
+
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
 
   return (
     <section className="cp-section">
@@ -1101,19 +1280,69 @@ function OrdersView() {
         </p>
       </header>
 
-      <div className="cp-card">
+      {/* Carte liste commandes */}
+      <div className="cp-card cp-card--stack">
+        {!apiReachable && (
+          <div className="cp-error">
+            Le serveur du portail ne répond pas. Les commandes peuvent
+            temporairement ne pas s&apos;afficher.
+          </div>
+        )}
+
         {error && <div className="cp-error">{error}</div>}
+
         {loading ? (
           <div className="cp-loader">Chargement de vos commandes...</div>
         ) : orders.length === 0 ? (
           <div className="cp-loader">Aucune commande pour le moment.</div>
         ) : (
           <div className="cp-orders-list">
-            {orders.map((order) => (
-              <OrderRow key={order.id} {...order} />
-            ))}
+            {orders.map((order) => {
+              const statusInfo = mapStatus(order.status);
+              return (
+                <OrderRow
+                  key={order.id}
+                  {...order}
+                  statusText={statusInfo.text}
+                  statusVariant={statusInfo.variant}
+                  onViewDetails={() => handleViewDetails(order)}
+                  onTrack={() => handleTrackOrder(order)}
+                />
+              );
+            })}
           </div>
         )}
+      </div>
+
+      {/* Carte détail commande */}
+      <div className="cp-card cp-card--stack" style={{ marginTop: 18 }}>
+        <h2 className="cp-card-title">Détail de la commande</h2>
+        <p className="cp-card-subtitle">
+          Sélectionnez une commande pour afficher son détail complet.
+        </p>
+
+        {detailsLoading && (
+          <div className="cp-loader">
+            Chargement du détail de la commande...
+          </div>
+        )}
+
+        {detailsError && <div className="cp-error">{detailsError}</div>}
+
+        {!detailsLoading && !orderDetails && !selectedOrder && (
+          <div className="cp-loader">
+            Aucune commande sélectionnée pour le moment.
+          </div>
+        )}
+
+        {!detailsLoading && selectedOrder && !orderDetails && (
+          <div className="cp-loader">
+            Le détail de cette commande n&apos;est pas disponible pour le
+            moment.
+          </div>
+        )}
+
+        {orderDetails && <OrderDetailsPanel details={orderDetails} />}
       </div>
     </section>
   );
@@ -1123,9 +1352,11 @@ function OrderRow({
   id,
   date,
   totalFormatted,
-  status,
-  statusVariant = "default",
   description,
+  statusText,
+  statusVariant = "default",
+  onViewDetails,
+  onTrack,
 }) {
   return (
     <div className="cp-order-row">
@@ -1139,13 +1370,91 @@ function OrderRow({
       </div>
       <div className="cp-order-side">
         <span className={`cp-status-tag cp-status-tag--${statusVariant}`}>
-          {status}
+          {statusText}
         </span>
-        <button className="cp-btn cp-btn--ghost" type="button">
-          Voir le détail
-        </button>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <button
+            className="cp-btn cp-btn--ghost"
+            type="button"
+            onClick={onViewDetails}
+          >
+            Voir le détail
+          </button>
+          <button
+            className="cp-btn cp-btn--primary"
+            type="button"
+            onClick={onTrack}
+          >
+            Suivre ma commande
+          </button>
+        </div>
       </div>
     </div>
+  );
+}
+
+/* Détail commande */
+
+function OrderDetailsPanel({ details }) {
+  const statusInfo = mapStatus(details.status);
+  const paid =
+    (details.financialStatus || "").toLowerCase() === "paid"
+      ? "Payé"
+      : "Non payé";
+
+  return (
+    <>
+      <div className="cp-order-details-meta">
+        <strong>{details.id}</strong>
+      </div>
+      <div className="cp-order-details-line">
+        Passée le {details.dateFormatted}
+      </div>
+      <div className="cp-order-details-line">
+        Total : {formatMoney(details.totalPrice, details.currency)} • Sous-total
+        : {formatMoney(details.subtotalPrice, details.currency)} • Livraison :{" "}
+        {details.shippingPrice != null
+          ? formatMoney(details.shippingPrice, details.currency)
+          : "0.00 EUR"}
+      </div>
+      <div className="cp-order-details-header-row">
+        <span>
+          Statut :{" "}
+          <span
+            className={`cp-status-tag cp-status-tag--${statusInfo.variant}`}
+          >
+            {statusInfo.text}
+          </span>
+        </span>
+        <span> Paiement : {paid}</span>
+      </div>
+
+      <div className="cp-order-details-section-title">Articles</div>
+      {(!details.lineItems || details.lineItems.length === 0) && (
+        <div className="cp-loader">
+          Aucun article trouvé pour cette commande.
+        </div>
+      )}
+      {details.lineItems && details.lineItems.length > 0 && (
+        <div className="cp-order-details-items">
+          {details.lineItems.map((li) => (
+            <div key={li.id} className="cp-order-details-item">
+              <div className="cp-order-details-item-left">
+                <div className="cp-order-details-item-title">{li.title}</div>
+                <div className="cp-order-details-item-meta">
+                  {li.sku && <>SKU : {li.sku} • </>}
+                  Quantité : {li.quantity}
+                  {li.variantTitle && ` • ${li.variantTitle}`}
+                </div>
+              </div>
+              <div className="cp-order-details-item-right">
+                <div>{formatMoney(li.total, details.currency)}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </>
   );
 }
 
@@ -1209,7 +1518,7 @@ function AddressesView() {
         )}
       </div>
 
-      {/* Formulaire -> toujours maquette pour l’instant */}
+      {/* Formulaire -> maquette */}
       <div className="cp-card cp-card--form">
         <h2 className="cp-card-title">Ajouter une adresse</h2>
         <p className="cp-card-subtitle">
