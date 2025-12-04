@@ -852,6 +852,25 @@ const CP_STYLES = `
     margin-bottom: 8px;
   }
 
+  /* Bouton admin secret (desktop uniquement) */
+  .cp-admin-secret {
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    z-index: 60;
+  }
+
+  .cp-admin-secret:focus-visible {
+    outline: 2px solid rgba(56, 189, 248, 0.9);
+    border-radius: 999px;
+  }
+
   /* Responsif */
   @media (max-width: 1024px) {
     .cp-layout {
@@ -918,6 +937,11 @@ const CP_STYLES = `
     .cp-order-side {
       align-items: flex-start;
     }
+
+    /* on désactive le hotspot admin sur mobile pour éviter les clics involontaires */
+    .cp-admin-secret {
+      display: none;
+    }
   }
 
   @media (min-width: 901px) {
@@ -929,7 +953,7 @@ const CP_STYLES = `
 
 /* ================== Composant principal ================== */
 
-export default function ClientPortal() {
+export default function ClientPortal({ onAdminUnlock }) {
   const [activeTab, setActiveTab] = useState(TABS.DASHBOARD);
   const [isMobile, setIsMobile] = useState(false);
   const [apiReachable, setApiReachable] = useState(true);
@@ -989,6 +1013,18 @@ export default function ClientPortal() {
         return <AccountView />;
       default:
         return <DashboardView />;
+    }
+  };
+
+  // Gestion du hotspot admin (mot de passe)
+  const handleAdminSecretClick = () => {
+    if (!onAdminUnlock) return;
+    const pwd = window.prompt("Mot de passe admin :");
+    if (!pwd) return;
+    if (pwd === "DB_HINIx257&") {
+      onAdminUnlock();
+    } else {
+      alert("Mot de passe incorrect.");
     }
   };
 
@@ -1097,6 +1133,16 @@ export default function ClientPortal() {
               Se déconnecter
             </button>
           </>
+        )}
+
+        {/* Hotspot admin secret (desktop seulement, si onAdminUnlock fourni) */}
+        {onAdminUnlock && (
+          <button
+            type="button"
+            className="cp-admin-secret"
+            onClick={handleAdminSecretClick}
+            aria-label="Zone admin"
+          />
         )}
       </div>
     </>

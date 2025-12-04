@@ -26,7 +26,7 @@ const TABS = {
   SETTINGS: "settings",
 };
 
-export default function AdminPortal() {
+export default function AdminPortal({ onExit }) {
   const [activeTab, setActiveTab] = useState(TABS.DASHBOARD);
 
   const renderContent = () => {
@@ -101,11 +101,27 @@ export default function AdminPortal() {
               active={activeTab === TABS.SETTINGS}
               onClick={() => setActiveTab(TABS.SETTINGS)}
             />
+
+            {/* Bouton retour portail client */}
+            <button
+              type="button"
+              className="admin-logout admin-logout--secondary"
+              onClick={() => {
+                if (onExit) {
+                  onExit();
+                }
+              }}
+            >
+              ← Retour espace client
+            </button>
+
             <button
               type="button"
               className="admin-logout"
               onClick={() =>
-                alert("Logout admin (à connecter plus tard à l’auth réelle).")
+                alert(
+                  "Logout admin (à connecter plus tard à l’auth réelle / Shopify)."
+                )
               }
             >
               Se déconnecter
@@ -194,7 +210,8 @@ function DashboardView() {
         setRecentOrders(orders);
       } catch (e) {
         console.error(e);
-        if (!cancelled) setError("Erreur lors du chargement du dashboard admin.");
+        if (!cancelled)
+          setError("Erreur lors du chargement du dashboard admin.");
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -385,7 +402,7 @@ function OrdersView() {
   );
 }
 
-/* Les autres vues restent en mode “texte démo” pour l’instant */
+/* Les autres vues restent démo */
 
 function ProductsView() {
   return (
