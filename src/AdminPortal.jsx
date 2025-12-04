@@ -458,7 +458,7 @@ function AdminCustomersTab({ profile, addresses, formatDate }) {
               </li>
               {profile.mode && (
                 <li>
-                  <strong>Mode :</strong> {profile.mode}</strong>
+                  <strong>Mode :</strong> {profile.mode}
                 </li>
               )}
             </ul>
